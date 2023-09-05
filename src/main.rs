@@ -7,7 +7,6 @@ extern crate log;
 extern crate pretty_env_logger;
 
 use dotenvy::dotenv;
-use serde::de::Unexpected::Bool;
 
 use sqlx::postgres::PgPoolOptions;
 
