@@ -1,8 +1,6 @@
 use rocket::serde::json::Json;
 
-use crate::models::*;
-
-// ---- CRUD for Questions ----
+use crate::models::{Answer, AnswerDetail, AnswerId, Question, QuestionDetail, QuestionId};
 
 #[post("/question", data = "<question>")]
 pub async fn create_question(question: Json<Question>) -> Json<QuestionDetail> {
@@ -26,8 +24,6 @@ pub async fn read_questions() -> Json<Vec<QuestionDetail>> {
 
 #[delete("/question", data = "<question_uuid>")]
 pub async fn delete_question(question_uuid: Json<QuestionId>) {}
-
-// ---- CRUD for Answers ----
 
 #[post("/answer", data = "<answer>")]
 pub async fn create_answer(answer: Json<Answer>) -> Json<AnswerDetail> {
