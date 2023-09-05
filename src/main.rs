@@ -13,6 +13,7 @@ use sqlx::postgres::PgPoolOptions;
 mod cors;
 mod handlers;
 mod models;
+mod persistence;
 
 use cors::CORS;
 use handlers::{
@@ -31,14 +32,6 @@ async fn rocket() -> _ {
         .connect(database_url.as_str())
         .await
         .expect("Failed to connect to Postgres");
-
-    let recs = sqlx::query!("SELECT * FROM questions")
-        .fetch_all(&pool)
-        .await
-        .expect("Failed to fetch questions");
-
-    info!("********* Question Records *********");
-    info!("{:?}", recs);
 
     rocket::build()
         .mount(
