@@ -7,6 +7,7 @@ extern crate log;
 extern crate pretty_env_logger;
 
 use dotenvy::dotenv;
+use serde::de::Unexpected::Bool;
 
 use sqlx::postgres::PgPoolOptions;
 
@@ -15,6 +16,8 @@ mod handlers;
 mod models;
 mod persistence;
 
+use crate::persistence::answers_dao::{AnswersDao, AnswersDaoImpl};
+use crate::persistence::questions_dao::{QuestionsDao, QuestionsDaoImpl};
 use cors::CORS;
 use handlers::{
     create_answer, create_question, delete_answer, delete_question, read_answers, read_questions,
@@ -33,6 +36,9 @@ async fn rocket() -> _ {
         .await
         .expect("Failed to connect to Postgres");
 
+    let questions_dao = QuestionsDaoImpl::new(pool.clone());
+    let answers_dao = AnswersDaoImpl::new(pool.clone());
+
     rocket::build()
         .mount(
             "/",
@@ -46,4 +52,6 @@ async fn rocket() -> _ {
             ],
         )
         .attach(CORS)
+        .manage(Box::new(questions_dao) as Box<dyn QuestionsDao + Send + Sync>)
+        .manage(Box::new(answers_dao) as Box<dyn AnswersDao + Send + Sync>)
 }

@@ -1,11 +1,16 @@
 mod handlers_inner;
 
-use rocket::serde::json::Json;
+use rocket::{serde::json::Json, State};
 
 use crate::models::{Answer, AnswerDetail, AnswerId, Question, QuestionDetail, QuestionId};
+use crate::persistence::answers_dao::AnswersDao;
+use crate::persistence::questions_dao::QuestionsDao;
 
 #[post("/question", data = "<question>")]
-pub async fn create_question(question: Json<Question>) -> Json<QuestionDetail> {
+pub async fn create_question(
+    question: Json<Question>,
+    questions_dao: &State<Box<dyn QuestionsDao + Sync + Send>>,
+) -> Json<QuestionDetail> {
     Json(QuestionDetail {
         question_uuid: "question_uuid".to_owned(),
         title: question.title.clone(),
@@ -15,7 +20,9 @@ pub async fn create_question(question: Json<Question>) -> Json<QuestionDetail> {
 }
 
 #[get("/questions")]
-pub async fn read_questions() -> Json<Vec<QuestionDetail>> {
+pub async fn read_questions(
+    questions_dao: &State<Box<dyn QuestionsDao + Sync + Send>>,
+) -> Json<Vec<QuestionDetail>> {
     Json(vec![QuestionDetail {
         question_uuid: "question_uuid".to_owned(),
         title: "title".to_owned(),
@@ -25,10 +32,17 @@ pub async fn read_questions() -> Json<Vec<QuestionDetail>> {
 }
 
 #[delete("/question", data = "<question_uuid>")]
-pub async fn delete_question(question_uuid: Json<QuestionId>) {}
+pub async fn delete_question(
+    question_uuid: Json<QuestionId>,
+    questions_dao: &State<Box<dyn QuestionsDao + Sync + Send>>,
+) {
+}
 
 #[post("/answer", data = "<answer>")]
-pub async fn create_answer(answer: Json<Answer>) -> Json<AnswerDetail> {
+pub async fn create_answer(
+    answer: Json<Answer>,
+    answers_dao: &State<Box<dyn AnswersDao + Send + Sync>>,
+) -> Json<AnswerDetail> {
     Json(AnswerDetail {
         answer_uuid: "answer_uuid".to_owned(),
         question_uuid: answer.question_uuid.clone(),
@@ -37,8 +51,11 @@ pub async fn create_answer(answer: Json<Answer>) -> Json<AnswerDetail> {
     })
 }
 
-#[get("/answers")]
-pub async fn read_answers() -> Json<Vec<AnswerDetail>> {
+#[get("/answers", data = "<question_uuid>")]
+pub async fn read_answers(
+    question_uuid: Json<QuestionId>,
+    answers_dao: &State<Box<dyn AnswersDao + Send + Sync>>,
+) -> Json<Vec<AnswerDetail>> {
     Json(vec![AnswerDetail {
         answer_uuid: "answer_uuid".to_owned(),
         question_uuid: "question_uuid".to_owned(),
@@ -48,4 +65,8 @@ pub async fn read_answers() -> Json<Vec<AnswerDetail>> {
 }
 
 #[delete("/answer", data = "<answer_uuid>")]
-pub async fn delete_answer(answer_uuid: Json<AnswerId>) {}
+pub async fn delete_answer(
+    answer_uuid: Json<AnswerId>,
+    answers_dao: &State<Box<dyn AnswersDao + Send + Sync>>,
+) {
+}
